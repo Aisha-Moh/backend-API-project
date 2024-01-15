@@ -1,3 +1,10 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+What files to add to connect to the two db's locally:
+
+- .env.test
+- .env.development
+
+How to create environment variables to clone this project and run locally:
+
+- add PGDATABASE=(with the correct database name for that environment)
