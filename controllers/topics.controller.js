@@ -1,7 +1,7 @@
-const { fetchTopics } = require("../models/topics.model");
+const { fetchTopics, fetchAPI } = require("../models/topics.model");
+const endpointsFile = require("../endpoints.json");
 
 module.exports.getTopics = (req, res, next) => {
-  console.log(req.query, "<< request query in controller");
   fetchTopics()
     .then((topics) => {
       res.status(200).send({ topics });
@@ -9,4 +9,8 @@ module.exports.getTopics = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+module.exports.getAPI = (req, res, next) => {
+  console.log(req.query, "in controller");
+  res.status(200).send(endpointsFile);
 };
