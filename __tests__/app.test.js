@@ -56,6 +56,7 @@ describe("app", () => {
         .then(({ body }) => {
           const { article } = body;
           expect(article).toHaveProperty("article_id");
+          expect(article.article_id).toBe(1);
           expect(article.title).toBe("Living in the shadow of a great man");
           expect(article.topic).toBe("mitch");
           expect(article.author).toBe("butter_bridge");
@@ -80,8 +81,61 @@ describe("app", () => {
         .get("/api/articles/notAnId")
         .expect(400)
         .then(({ body }) => {
-          console.log(body, "bod");
           expect(body.msg).toBe("invalid ID: 400 Bad request");
+        });
+    });
+  });
+  describe("GET /api/articles", () => {
+    test("200: status, responds with an array of article objects with all appropriate properties", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles.length).toBeGreaterThan(0);
+
+          articles.forEach((article) => {
+            expect(article).toHaveProperty("author");
+            expect(article).toHaveProperty("title");
+            expect(article).toHaveProperty("article_id");
+            expect(article).toHaveProperty("topic");
+            expect(article).toHaveProperty("created_at");
+            expect(article).toHaveProperty("votes");
+            expect(article).toHaveProperty("article_img_url");
+          });
+        });
+    });
+    test("200: responds with correctly sorted and ordered results (date created at in desc order) and not including the 'body' property", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+          expect(articles).not.toHaveProperty("body");
+        });
+    });
+    test("404: responds with status when non existent path", () => {
+      return request(app)
+        .get("/api/artickles")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found");
+        });
+    });
+    test("200: status,responds with an articles arry with 'comment_count' property and also includes articles without comments", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          console.log(body, "bodyy");
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(Array.isArray(articles)).toBe(true);
+          articles.forEach((article) => {
+            expect(article).toHaveProperty("comment_count");
+          });
         });
     });
   });
