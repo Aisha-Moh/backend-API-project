@@ -81,7 +81,7 @@ describe("app", () => {
         .get("/api/articles/notAnId")
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("invalid ID: 400 Bad request");
+          expect(body.msg).toBe("Bad request");
         });
     });
   });
@@ -93,7 +93,7 @@ describe("app", () => {
         .then(({ body }) => {
           const { articles } = body;
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles.length).toBeGreaterThan(0);
+          expect(articles.length).toBe(13);
 
           articles.forEach((article) => {
             expect(article).toHaveProperty("author");
@@ -124,18 +124,71 @@ describe("app", () => {
           expect(body.msg).toBe("endpoint not found");
         });
     });
-    test("200: status,responds with an articles arry with 'comment_count' property and also includes articles without comments", () => {
+    test("200: status,responds with an articles array with 'comment_count' property and also includes articles without comments", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          console.log(body, "bodyy");
           const { articles } = body;
           expect(articles.length).toBe(13);
           expect(Array.isArray(articles)).toBe(true);
           articles.forEach((article) => {
             expect(article).toHaveProperty("comment_count");
           });
+        });
+    });
+  });
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("200: status, responds with an array list of comments by article_id", () => {
+      return request(app)
+        .get("/api/articles/9/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(Array.isArray(comments)).toBe(true);
+          expect(comments.length).toBe(2);
+          comments.forEach((comment) => {
+            expect(comment).toHaveProperty("comment_id");
+            expect(comment).toHaveProperty("votes");
+            expect(comment).toHaveProperty("created_at");
+            expect(comment).toHaveProperty("author");
+            expect(comment).toHaveProperty("body");
+            expect(comment).toHaveProperty("article_id");
+          });
+        });
+    });
+    test("200: status, when providing a valid article id but it has no comments", () => {
+      return request(app)
+        .get("/api/articles/4/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(Array.isArray(comments)).toBe(true);
+          expect(comments.length).toBe(0);
+        });
+    });
+    test("404: responds with status when non existent path", () => {
+      return request(app)
+        .get("/api/articles/9/commmmmments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found");
+        });
+    });
+    test("400: responds with status when invalid id input", () => {
+      return request(app)
+        .get("/api/articles/bananas/comments")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+    test("404: status, when providing correct format but article doesnt exist", () => {
+      return request(app)
+        .get("/api/articles/9999/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("article not found");
         });
     });
   });
