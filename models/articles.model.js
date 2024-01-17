@@ -9,7 +9,7 @@ module.exports.fetchArticleById = (id) => {
       `SELECT * FROM articles 
         WHERE article_id = $1`,
       [id]
-    )
+    ) // could do SELECT articles.* to refactor above
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({ status: 404, msg: "endpoint not found" });
@@ -22,7 +22,7 @@ module.exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
   return db
     .query(
       `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url,
-      COUNT(comments.article_id) AS comment_count 
+    COUNT(comments.article_id) AS comment_count 
     FROM articles
     LEFT JOIN comments on articles.article_id = comments.article_id
     GROUP BY articles.article_id
