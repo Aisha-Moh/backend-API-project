@@ -200,12 +200,78 @@ describe("app", () => {
           .expect(201)
           .then(({ body }) => {
             const comment = body;
-            console.log(comment, "commentssss");
-            expect(comment.author === "butter_bridge").toBe(true);
-            expect(comment.body === "hello").toBe(true);
+            expect(comment.author).toBe("butter_bridge");
+            expect(comment.body).toBe("hello");
             expect(comment.hasOwnProperty("created_at")).toBe(true);
             expect(comment.hasOwnProperty("comment_id")).toBe(true);
           });
+      });
+      test("201: status, ignores unnessecary properties", () => {
+        return request(app)
+          .post("/api/articles/9/comments")
+          .send({
+            username: "butter_bridge",
+            body: "hello",
+            thisPropertyIs: "notNeeded",
+          })
+          .expect(201)
+          .then(({ body }) => {
+            const comment = body;
+            expect(comment.author).toBe("butter_bridge");
+            expect(comment.body).toBe("hello");
+            expect(comment.hasOwnProperty("created_at")).toBe(true);
+            expect(comment.hasOwnProperty("comment_id")).toBe(true);
+          });
+      });
+      test(": status, if request is made missing required fields in the request body", () => {
+        return request(app)
+          .post("/api/articles/9/comments")
+          .send({ body: "hello" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad request");
+          });
+      });
+
+      describe("PATCH /api/articles/:article_id", () => {
+        test("201: status, updates an articles votes by article_id correctly when given a postive integer", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ inc_votes: 2 })
+            .expect(201)
+            .then(({ body }) => {
+              const article = body;
+              expect(article.votes).toBe(102);
+            });
+        });
+        test("201: status, updates an articles votes by article_id correctly when given a negative integer", () => {
+          return request(app)
+            .patch("/api/articles/2")
+            .send({ inc_votes: -20 })
+            .expect(201)
+            .then(({ body }) => {
+              const article = body;
+              expect(article.votes).toBe(-20);
+            });
+        });
+        test("404: responds with status when non existent path", () => {
+          return request(app)
+            .patch("/api/articles/9999999")
+            .send({ inc_votes: -20 })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("endpoint not found");
+            });
+        });
+        test("400: responds with status when invalid data type in request body", () => {
+          return request(app)
+            .patch("/api/articles/bananas")
+            .send({ inc_votes: "string" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad request");
+            });
+        });
       });
     });
   });
