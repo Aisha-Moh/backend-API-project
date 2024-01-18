@@ -242,6 +242,7 @@ describe("app", () => {
             .then(({ body }) => {
               const article = body;
               expect(article.votes).toBe(102);
+              expect(article.article_id).toBe(1);
             });
         });
         test("201: status, updates an articles votes by article_id correctly when given a negative integer", () => {
@@ -287,6 +288,29 @@ describe("app", () => {
           return request(app).delete("/api/comments/9999").expect(404);
         });
       });
+    });
+  });
+  describe("GET /api/users", () => {
+    test("200: status, responds with an array of user objects", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          const { users } = body;
+          users.forEach((user) => {
+            expect(user).toHaveProperty("username");
+            expect(user).toHaveProperty("name");
+            expect(user).toHaveProperty("avatar_url");
+          });
+        });
+    });
+    test("404: responds with status when non existent path", () => {
+      return request(app)
+        .get("/api/usersss")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found");
+        });
     });
   });
 });
