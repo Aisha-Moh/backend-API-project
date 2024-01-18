@@ -26,7 +26,6 @@ module.exports.insertComment = (comments, article_id) => {
       [comments.username, comments.body, article_id]
     )
     .then(({ rows }) => {
-      console.log(rows);
       return rows[0];
     });
 };
