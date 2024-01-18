@@ -145,7 +145,7 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { comments } = body;
-          expect(Array.isArray(comments)).toBe(true);
+          expect(Array.isArray(comments)).toBe(true); // this line isnt needed as the forEach tells us its an array
           expect(comments.length).toBe(2);
           comments.forEach((comment) => {
             expect(comment).toHaveProperty("comment_id");
@@ -271,6 +271,20 @@ describe("app", () => {
             .then(({ body }) => {
               expect(body.msg).toBe("Bad request");
             });
+        });
+      });
+      describe("DELETE /api/comments/:comment_id", () => {
+        test("204: status, deletes a comment by comment_id", () => {
+          return request(app).delete("/api/comments/1").expect(204);
+        });
+        test("404: status, when non existent path", () => {
+          return request(app).delete("/api/commmmments/1").expect(404);
+        });
+        test("400: responds with status when invalid data type in request body", () => {
+          return request(app).delete("/api/comments/bananas").expect(400);
+        });
+        test("404: status, when non existent path", () => {
+          return request(app).delete("/api/comments/9999").expect(404);
         });
       });
     });

@@ -2,6 +2,7 @@ const { checkForArticles } = require("../db/seeds/utils");
 const {
   fetchCommentsByArticleId,
   insertComment,
+  deleteComment,
 } = require("../models/comments.model");
 
 module.exports.getCommentsByArticleId = (req, res, next) => {
@@ -28,6 +29,18 @@ module.exports.postCommentByArticleId = (req, res, next) => {
   insertComment(comments, article_id)
     .then((comment) => {
       res.status(201).send(comment);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports.deleteCommentByCommentId = (req, res, next) => {
+  const { comment_id } = req.params;
+
+  deleteComment(comment_id)
+    .then(() => {
+      res.status(204).send(); //
     })
     .catch((err) => {
       next(err);
