@@ -175,6 +175,14 @@ describe("app", () => {
           expect(body.msg).toBe("endpoint not found");
         });
     });
+    test("404: status, when providing correct format but article doesnt exist", () => {
+      return request(app)
+        .get("/api/articles/9999/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("article not found");
+        });
+    });
     test("400: responds with status when invalid id input", () => {
       return request(app)
         .get("/api/articles/bananas/comments")
@@ -183,13 +191,22 @@ describe("app", () => {
           expect(body.msg).toBe("Bad request");
         });
     });
-    test("404: status, when providing correct format but article doesnt exist", () => {
-      return request(app)
-        .get("/api/articles/9999/comments")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).toBe("article not found");
-        });
+
+    describe("POST /api/articles/:article_id/comments", () => {
+      test("201: status, responds with an insterted comment", () => {
+        return request(app)
+          .post("/api/articles/9/comments")
+          .send({ username: "butter_bridge", body: "hello" })
+          .expect(201)
+          .then(({ body }) => {
+            const comment = body;
+            console.log(comment, "commentssss");
+            expect(comment.author === "butter_bridge").toBe(true);
+            expect(comment.body === "hello").toBe(true);
+            expect(comment.hasOwnProperty("created_at")).toBe(true);
+            expect(comment.hasOwnProperty("comment_id")).toBe(true);
+          });
+      });
     });
   });
 });
