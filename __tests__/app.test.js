@@ -372,4 +372,41 @@ describe("app", () => {
         });
     });
   });
+  describe("GET /api/articles/:article_id (comment count)", () => {
+    test("200: status, responds with a single article object by id which includes a comment count", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toHaveProperty("comment_count");
+          expect(article.article_id).toBe(1);
+          expect(article.title).toBe("Living in the shadow of a great man");
+          expect(article.topic).toBe("mitch");
+          expect(article.author).toBe("butter_bridge");
+          expect(article.body).toBe("I find this existence challenging");
+          expect(article.created_at).toBe("2020-07-09T20:11:00.000Z");
+          expect(article.votes).toBe(100);
+          expect(article.article_img_url).toBe(
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+          );
+        });
+    });
+    test("404: responds with status when non existent path", () => {
+      return request(app)
+        .get("/api/articlesss/1")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found");
+        });
+    });
+    test("400: status, responds with err msg when invalid input type", () => {
+      return request(app)
+        .get("/api/articles/bananas")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+  });
 });
