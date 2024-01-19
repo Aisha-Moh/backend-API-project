@@ -313,4 +313,63 @@ describe("app", () => {
         });
     });
   });
+  describe("GET /api/articles", () => {
+    test("200: status, responds with filtered articles based off topic query: mitch", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(12);
+          articles.forEach((article) => {
+            expect(article.topic).toBe("mitch");
+          });
+        });
+    });
+
+    test("200: status, responds with filtered articles based off topic query: cats", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(1);
+          expect(articles[0].topic).toBe("cats");
+        });
+    });
+    test("200: status, responds with all articles when query omitted", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+        });
+    });
+    test("200: status, responds with an empty array when given a valid topic query thats not found on any articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(0);
+        });
+    });
+    test("400: status, responds with err msg when topic query not found", () => {
+      return request(app)
+        .get("/api/articles?topic=dogs")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("invalid topic query");
+        });
+    });
+    test("404: responds with status when non existent path", () => {
+      return request(app)
+        .get("/api/articlesss?topic=cats")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found");
+        });
+    });
+  });
 });

@@ -36,3 +36,18 @@ module.exports.checkForArticles = (article_id) => {
       }
     });
 };
+// module.exports.checkForTopics = (topic) => {
+//   return db
+//     .query(
+//       `SELECT * FROM articles
+//       WHERE topic = $1
+//      `,
+//       [topic]
+//     )
+//     .then(({ rows }) => {
+//       console.log(rows, "check exists");
+//       if (rows.length === 0) {
+//         return Promise.reject({ status: 400, msg: "topic not found" });
+//       }
+//     });
+// };
