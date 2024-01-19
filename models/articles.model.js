@@ -6,9 +6,17 @@ const articles = require("../db/data/test-data/articles");
 module.exports.fetchArticleById = (id) => {
   return db
     .query(
-      `SELECT * FROM articles 
-        WHERE article_id = $1`,
+      `SELECT articles.*,
+    COUNT(comments.comment_id) AS comment_count 
+    FROM articles
+    LEFT JOIN comments on articles.article_id = comments.article_id
+    WHERE articles.article_id = $1 
+    GROUP BY articles.article_id
+    `,
       [id]
+      //   `SELECT * FROM articles
+      //     WHERE article_id = $1`,
+      //   [id]
     ) // could do SELECT articles.* to refactor above
     .then(({ rows }) => {
       if (rows.length === 0) {
