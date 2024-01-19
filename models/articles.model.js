@@ -18,19 +18,32 @@ module.exports.fetchArticleById = (id) => {
     });
 };
 
-module.exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
-  return db
-    .query(
-      `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url,
+module.exports.fetchArticles = (
+  sort_by = "created_at",
+  order = "desc",
+  topic = ""
+) => {
+  const validTopicQueries = ["cats", "mitch", "paper", ""];
+  if (!validTopicQueries.includes(topic)) {
+    return Promise.reject({ status: 400, msg: "invalid topic query" });
+  }
+  let queryStr = `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url,
     COUNT(comments.article_id) AS comment_count 
     FROM articles
     LEFT JOIN comments on articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order}`
-    )
-    .then(({ rows }) => {
-      return rows;
-    });
+    `;
+
+  const queryValues = [];
+
+  if (topic) {
+    queryStr += ` WHERE topic = $1`;
+    queryValues.push(topic);
+  }
+  queryStr += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`;
+
+  return db.query(queryStr, queryValues).then(({ rows }) => {
+    return rows;
+  });
 };
 
 module.exports.updateVote = (votes, article_id) => {
